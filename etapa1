@@ -1,0 +1,59 @@
+<?php
+
+// 1. conectar com o banco
+$host = 'localhost';
+$login ='root';
+$senha = '';
+$db='atividade1';
+
+try {
+    $conn = new PDO("mysql:host=$host", $login, $senha);
+    // set the PDO error mode to exception
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $sql = "CREATE DATABASE $db";
+    // use exec() because no results are returned
+    $conn->exec($sql);
+    echo "Banco de dados criado com sucesso!<br/>";
+
+    $conn = new PDO("mysql:host=$host;dbname=$db", $login, $senha);
+    // set the PDO error mode to exception
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // 2. criar a tabela de estados
+    $sql = "CREATE TABLE estado (
+      id int(11) PRIMARY KEY AUTO_INCREMENT,
+      cod_uf varchar(2),
+      cod_ibge int(11),
+      nome_estado varchar(255),
+      nome_regiao varchar(255),
+      quantidade_cidades int(11)
+    )";
+    $conn->exec($sql);
+    echo "Tabela Estados criada com sucesso!<br/>";
+    }catch(PDOException $e) {
+        echo $sql . "<br>" . $e->getMessage();
+    }
+
+// 3. ler o arquivo de estados
+$handle = fopen("lista_estados.csv", "r" );
+
+// 3.1 linha a linha fazer insert
+while($linha=fgetcsv($handle, 1000, ";"))
+    {
+        $cod_uf = $linha[0];
+        $cod_ibge = $linha[1];
+        $nome_estado = $linha[2];
+        $nome_regiao = $linha[3];
+        $quantidade = $linha[4];
+
+        $result = $conn->Query(
+                "INSERT INTO estado (cod_uf, cod_ibge, nome_estado, nome_regiao, quantidade_cidades) 
+                VALUES ('$cod_uf', '$cod_ibge', '$nome_estado', '$nome_regiao', '$quantidade')"
+                );
+    }
+    if($result) {
+        echo "Dados inseridos com sucesso";
+    }else{
+        echo "Erro ao inserir os dados";
+    }
+$conn = null;
