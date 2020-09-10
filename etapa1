@@ -21,8 +21,7 @@ try {
 
     // 2. criar a tabela de estados
     $sql = "CREATE TABLE estado (
-      id int(11) PRIMARY KEY AUTO_INCREMENT,
-      cod_uf varchar(2),
+      cod_uf varchar(2) PRIMARY KEY,
       cod_ibge int(11),
       nome_estado varchar(255),
       nome_regiao varchar(255),
@@ -52,8 +51,49 @@ while($linha=fgetcsv($handle, 1000, ";"))
                 );
     }
     if($result) {
-        echo "Dados inseridos com sucesso";
+        echo "Dados inseridos com sucesso<br/>";
     }else{
-        echo "Erro ao inserir os dados";
+        echo "Erro ao inserir os dados<br/>";
     }
+
+// 4. criar a tabela de cidades
+$sql = "CREATE TABLE municipio (
+      cod_ibge integer PRIMARY KEY,
+      cod_uf varchar(2),
+      FOREIGN KEY (cod_uf) REFERENCES estado (cod_uf),
+      nome_municipio varchar(255),
+      nome_regiao varchar(255),
+      quantidade_populacao integer,
+      tipo_porte varchar(255)                                         
+    )";
+$conn->exec($sql);
+echo "Tabela Municípios criada com sucesso!<br/>";
+
+// 5. ler o arquivo de lista de municípios
+$handle = fopen("lista_municipios.csv", "r" );
+
+// 5.1 linha a linha fazer insert
+while($linha=fgetcsv($handle, 1000, ";"))
+{
+    $cod_ibge = $linha[0];
+    $cod_uf = $linha[1];
+    $nome_municipio = $linha[2];
+    $nome_regiao = $linha[3];
+    $quantidade_populacao = $linha[4];
+    $tipo_porte = $linha[5];
+
+    $result = $conn->Query(
+        "INSERT INTO municipio (cod_ibge, cod_uf, nome_municipio, nome_regiao, quantidade_populacao, tipo_porte)
+                VALUES ('$cod_ibge', '$cod_uf', '$nome_municipio', '$nome_regiao', '$quantidade_populacao', '$tipo_porte')"
+                );
+
+}
+    if($result) {
+        echo "Dados inseridos com sucesso<br/>";
+    }else{
+        echo "Erro ao inserir os dados<br/>";
+    }
+
 $conn = null;
+
+    ?>
