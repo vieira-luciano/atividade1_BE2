@@ -8,10 +8,11 @@ $db='atividade1';
 
 try {
     $conn = new PDO("mysql:host=$host", $login, $senha);
-    // set the PDO error mode to exception
+
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
     $sql = "CREATE DATABASE $db";
-    // use exec() because no results are returned
+
     $conn->exec($sql);
     echo "Banco de dados criado com sucesso!<br/>";
 
@@ -55,7 +56,7 @@ while($linha=fgetcsv($handle, 1000, ";"))
     }else{
         echo "Erro ao inserir os dados<br/>";
     }
-
+    fclose($handle);
 // 4. criar a tabela de cidades
 $sql = "CREATE TABLE municipio (
       cod_ibge integer PRIMARY KEY,
@@ -73,27 +74,25 @@ echo "Tabela Municípios criada com sucesso!<br/>";
 $handle = fopen("lista_municipios.csv", "r" );
 
 // 5.1 linha a linha fazer insert
-while($linha=fgetcsv($handle, 1000, ";"))
+while($linha=fgetcsv($handle, 1000, ";",'"','\\'))
 {
     $cod_ibge = $linha[0];
     $cod_uf = $linha[1];
-    $nome_municipio = $linha[2];
-    $nome_regiao = $linha[3];
+    $nome_municipio =  addslashes($linha[2]);
+    $nome_regiao = addslashes($linha[3]);
     $quantidade_populacao = $linha[4];
-    $tipo_porte = $linha[5];
+    $tipo_porte = addslashes($linha[5]);
 
-    $result = $conn->Query(
+
+  $result = $conn->Query(
         "INSERT INTO municipio (cod_ibge, cod_uf, nome_municipio, nome_regiao, quantidade_populacao, tipo_porte)
-                VALUES ('$cod_ibge', '$cod_uf', '$nome_municipio', '$nome_regiao', '$quantidade_populacao', '$tipo_porte')"
-                );
-
+                VALUES ('$cod_ibge', '$cod_uf', '$nome_municipio', $nome_regiao', '$quantidade_populacao', '$tipo_porte')"
+               );
 }
     if($result) {
         echo "Dados inseridos com sucesso<br/>";
     }else{
         echo "Erro ao inserir os dados<br/>";
     }
-
+fclose($handle);
 $conn = null;
-
-    ?>
